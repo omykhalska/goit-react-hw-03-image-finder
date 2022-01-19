@@ -1,23 +1,29 @@
 import React, { Component } from 'react';
+import {
+  Wrapper,
+  SearchForm,
+  SearchFormBtn,
+  SearchFormBtnLabel,
+  SearchInput,
+} from './Searchbar.styled';
 
 class Searchbar extends Component {
   render() {
     return (
-      <header class="searchbar">
-        <form class="form">
-          <button type="submit" class="button">
-            <span class="button-label">Search</span>
-          </button>
+      <Wrapper>
+        <SearchForm>
+          <SearchFormBtn type="submit">
+            <SearchFormBtnLabel>Search</SearchFormBtnLabel>
+          </SearchFormBtn>
 
-          <input
-            class="input"
+          <SearchInput
             type="text"
-            autocomplete="off"
-            autofocus
-            placeholder="Search images and photos"
+            autoComplete="off"
+            autoFocus
+            placeHolder="Search images and photos"
           />
-        </form>
-      </header>
+        </SearchForm>
+      </Wrapper>
     );
   }
 }

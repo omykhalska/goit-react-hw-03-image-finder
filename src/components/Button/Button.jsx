@@ -1,7 +1,8 @@
 import React from 'react';
+import { LoadMoreBtn } from './Button.styled';
 
 function Button() {
-  return <button type="button">Load more</button>;
+  return <LoadMoreBtn type="button">Load more</LoadMoreBtn>;
 }
 
 export default Button;
