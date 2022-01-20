@@ -7,8 +7,8 @@ function App() {
   return (
     <Container>
       <Searchbar />
-      <ImageGallery />
-      <Button />
+      {/* <ImageGallery />
+      <Button /> */}
     </Container>
   );
 }
