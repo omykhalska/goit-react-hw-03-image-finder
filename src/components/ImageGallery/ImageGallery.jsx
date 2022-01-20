@@ -1,14 +1,20 @@
 import React from 'react';
 import { GalleryBox } from './ImageGallery.styled';
+import ImageGalleryItem from '../ImageGalleryItem';
 
-function ImageGallery() {
+function ImageGallery({ images }) {
   return (
-    <GalleryBox>
-      <li>image 1</li>
-      <li>image 2</li>
-      <li>image 3</li>
-      <li>image 4</li>
-    </GalleryBox>
+    <>
+      <GalleryBox>
+        {images.map(({ webformatURL, tags }, index) => (
+          <ImageGalleryItem
+            key={index}
+            imageUrl={webformatURL}
+            imageTags={tags}
+          />
+        ))}
+      </GalleryBox>
+    </>
   );
 }
 

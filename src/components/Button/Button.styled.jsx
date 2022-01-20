@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
 export const LoadMoreBtn = styled.button`
+  margin-left: auto;
+  margin-right: auto;
   padding: 8px 16px;
   border-radius: 2px;
   background-color: #3f51b5;
