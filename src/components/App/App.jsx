@@ -14,6 +14,7 @@ class App extends Component {
     query: '',
     images: [],
     totalImages: 0,
+    activeImage: 0,
     page: 1,
     status: 'idle',
     showModal: false,
@@ -83,9 +84,20 @@ class App extends Component {
     this.setState(({ showModal }) => ({ showModal: !showModal }));
   };
 
+  handleImageClick = index => {
+    this.setState({ activeImage: index });
+    this.toggleModal();
+  };
+
   render() {
-    const { handleFormSubmit, handleLoadMoreBtn, toggleModal } = this;
-    const { images, totalImages, status, page, showModal } = this.state;
+    const {
+      handleFormSubmit,
+      handleLoadMoreBtn,
+      toggleModal,
+      handleImageClick,
+    } = this;
+    const { images, totalImages, status, page, showModal, activeImage } =
+      this.state;
 
     if (status === 'idle') {
       return (
@@ -142,18 +154,15 @@ class App extends Component {
         <Container>
           <Toaster />
           <Searchbar onSubmit={handleFormSubmit} />
-          <ImageGallery images={images} onClick={toggleModal} />
+          <ImageGallery images={images} onClick={handleImageClick} />
           {totalImages !== images.length ? (
             <Button onClick={handleLoadMoreBtn} />
           ) : null}
-          {/* {showModal && (
-            <Modal>
-              <img
-                src="https://pixabay.com/photos/jellyfish-creature-sea-5438288/"
-                alt="jellyfish"
-              />
+          {showModal && (
+            <Modal onClose={toggleModal}>
+              <img src={images[activeImage].largeImageURL} alt="hello" />
             </Modal>
-          )} */}
+          )}
         </Container>
       );
     }
