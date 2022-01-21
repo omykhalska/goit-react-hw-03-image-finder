@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { BallTriangle } from 'react-loader-spinner';
 import Searchbar from '../Searchbar/';
 import ImageGallery from '../ImageGallery';
 import Button from '../Button/';
+import Loader from '../Loader';
+import Modal from '../Modal';
 import { Container, ErrorText } from './App.styled';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { getImages } from '../../services/searchImagesApi';
@@ -15,20 +16,23 @@ class App extends Component {
     totalImages: 0,
     page: 1,
     status: 'idle',
+    showModal: false,
   };
 
   async componentDidUpdate(_, prevStates) {
     const { page, query } = this.state;
-    const { notification } = this;
+    const { showNotification, toggleModal } = this;
 
     if (prevStates.query !== query) {
       this.setState({ status: 'pending' });
+      toggleModal();
 
       await getImages(query, page)
         .then(({ data }) => {
           if (data.hits.length === 0) {
-            notification('There is no images for this search query');
+            showNotification('There is no images for this search query');
             this.setState({ status: 'idle', images: [] });
+            toggleModal();
             return;
           }
 
@@ -37,6 +41,7 @@ class App extends Component {
             totalImages: data.totalHits,
             status: 'resolved',
           });
+          toggleModal();
         })
         .catch(error => {
           console.log(error.message);
@@ -44,17 +49,20 @@ class App extends Component {
         });
     } else if (prevStates.page !== page) {
       this.setState({ status: 'pending' });
+      toggleModal();
 
       await getImages(query, page)
-        .then(({ data }) =>
+        .then(({ data }) => {
+          toggleModal();
           this.setState(prevState => ({
             images: [...prevState.images, ...data.hits],
             status: 'resolved',
-          })),
-        )
+          }));
+        })
         .catch(error => {
           console.log(error.message);
           this.setState({ status: 'rejected' });
+          toggleModal();
         });
     }
   }
@@ -67,13 +75,17 @@ class App extends Component {
     this.setState({ query, page: 1 });
   };
 
-  notification = text => {
+  showNotification = text => {
     toast.error(text);
   };
 
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  };
+
   render() {
-    const { handleFormSubmit, handleLoadMoreBtn } = this;
-    const { images, totalImages, status, page } = this.state;
+    const { handleFormSubmit, handleLoadMoreBtn, toggleModal } = this;
+    const { images, totalImages, status, page, showModal } = this.state;
 
     if (status === 'idle') {
       return (
@@ -91,12 +103,12 @@ class App extends Component {
             <Toaster />
             <Searchbar onSubmit={handleFormSubmit} />
             <ImageGallery images={images} />
-            <BallTriangle
-              heigth="100"
-              width="100"
-              color="grey"
-              arialLabel="loading-indicator"
-            />
+
+            {showModal && (
+              <Modal>
+                <Loader />
+              </Modal>
+            )}
           </Container>
         );
       } else {
@@ -104,12 +116,12 @@ class App extends Component {
           <Container>
             <Toaster />
             <Searchbar onSubmit={handleFormSubmit} />
-            <BallTriangle
-              heigth="100"
-              width="100"
-              color="grey"
-              arialLabel="loading-indicator"
-            />
+
+            {showModal && (
+              <Modal>
+                <Loader />
+              </Modal>
+            )}
           </Container>
         );
       }
@@ -130,10 +142,18 @@ class App extends Component {
         <Container>
           <Toaster />
           <Searchbar onSubmit={handleFormSubmit} />
-          <ImageGallery images={images} />
-          {images.length > 0 && totalImages !== images.length ? (
+          <ImageGallery images={images} onClick={toggleModal} />
+          {totalImages !== images.length ? (
             <Button onClick={handleLoadMoreBtn} />
           ) : null}
+          {/* {showModal && (
+            <Modal>
+              <img
+                src="https://pixabay.com/photos/jellyfish-creature-sea-5438288/"
+                alt="jellyfish"
+              />
+            </Modal>
+          )} */}
         </Container>
       );
     }

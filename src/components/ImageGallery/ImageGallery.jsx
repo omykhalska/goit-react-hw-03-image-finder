@@ -2,7 +2,7 @@ import React from 'react';
 import { GalleryBox } from './ImageGallery.styled';
 import ImageGalleryItem from '../ImageGalleryItem';
 
-function ImageGallery({ images }) {
+function ImageGallery({ images, onClick }) {
   return (
     <>
       <GalleryBox>
@@ -11,6 +11,7 @@ function ImageGallery({ images }) {
             key={index}
             imageUrl={webformatURL}
             imageTags={tags}
+            onClick={onClick}
           />
         ))}
       </GalleryBox>

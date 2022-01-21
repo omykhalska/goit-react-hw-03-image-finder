@@ -1,9 +1,9 @@
 import React from 'react';
 import { GalleryItem, GalleryImage } from './ImageGalleryItem.styled';
 
-function ImageGalleryItem({ imageUrl, imageTags }) {
+function ImageGalleryItem({ imageUrl, imageTags, onClick }) {
   return (
-    <GalleryItem>
+    <GalleryItem onClick={onClick}>
       <GalleryImage src={imageUrl} alt={imageTags} />
     </GalleryItem>
   );
