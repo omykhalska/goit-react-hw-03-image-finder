@@ -4,7 +4,7 @@ import { BallTriangle } from 'react-loader-spinner';
 import Searchbar from '../Searchbar/';
 import ImageGallery from '../ImageGallery';
 import Button from '../Button/';
-import { Container } from './App.styled';
+import { Container, ErrorText } from './App.styled';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { getImages } from '../../services/searchImagesApi';
 
@@ -120,7 +120,7 @@ class App extends Component {
         <Container>
           <Toaster />
           <Searchbar onSubmit={handleFormSubmit} />
-          <h1>Something went wrong... Try again later!</h1>
+          <ErrorText>Something went wrong... Try again later!</ErrorText>
         </Container>
       );
     }

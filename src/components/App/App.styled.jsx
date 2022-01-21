@@ -6,3 +6,9 @@ export const Container = styled.div`
   grid-gap: 16px;
   padding-bottom: 24px;
 `;
+
+export const ErrorText = styled.h1`
+  text-align: center;
+  font-size: 24px;
+  color: red;
+`;
