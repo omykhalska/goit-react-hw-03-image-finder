@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { ImSearch } from 'react-icons/im';
 
 export const Wrapper = styled.header`
   top: 0;
@@ -48,18 +49,6 @@ export const SearchFormBtn = styled.button`
   }
 `;
 
-export const SearchFormBtnLabel = styled.span`
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  clip-path: inset(50%);
-  border: 0;
-`;
-
 export const SearchInput = styled.input`
   display: inline-block;
   width: 100%;
@@ -74,4 +63,9 @@ export const SearchInput = styled.input`
     font: inherit;
     font-size: 18px;
   }
+`;
+
+export const Btn = styled(ImSearch)`
+  width: 20px;
+  height: 20px;
 `;

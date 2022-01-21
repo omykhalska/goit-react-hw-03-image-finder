@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import toast from 'react-hot-toast';
+import { ImSearch } from 'react-icons/im';
 import {
   Wrapper,
   SearchForm,
   SearchFormBtn,
-  SearchFormBtnLabel,
   SearchInput,
+  Btn,
 } from './Searchbar.styled';
 
 class Searchbar extends Component {
@@ -37,8 +38,12 @@ class Searchbar extends Component {
     return (
       <Wrapper>
         <SearchForm>
-          <SearchFormBtn type="submit" onClick={onSearchBtnClick}>
-            <SearchFormBtnLabel>Search</SearchFormBtnLabel>
+          <SearchFormBtn
+            type="submit"
+            aria-label="search"
+            onClick={onSearchBtnClick}
+          >
+            <Btn />
           </SearchFormBtn>
 
           <SearchInput
