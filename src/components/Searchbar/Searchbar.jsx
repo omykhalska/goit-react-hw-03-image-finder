@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
-import { ImSearch } from 'react-icons/im';
 import {
   Wrapper,
   SearchForm,
@@ -10,6 +10,10 @@ import {
 } from './Searchbar.styled';
 
 class Searchbar extends Component {
+  static propTypes = {
+    onSubmit: PropTypes.func.isRequired,
+  };
+
   state = {
     searchQuery: '',
   };
@@ -20,6 +24,7 @@ class Searchbar extends Component {
 
   onSearchBtnClick = e => {
     const { searchQuery } = this.state;
+    const { onSubmit } = this.props;
 
     e.preventDefault();
     if (searchQuery.trim() === '') {
@@ -27,7 +32,7 @@ class Searchbar extends Component {
       return;
     }
 
-    this.props.onSubmit(searchQuery);
+    onSubmit(searchQuery);
     this.setState({ searchQuery: '' });
   };
 

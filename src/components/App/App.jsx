@@ -25,15 +25,13 @@ class App extends Component {
     const { showNotification, toggleModal } = this;
 
     if (prevStates.query !== query) {
-      this.setState({ status: 'pending' });
-      toggleModal();
+      this.setState({ status: 'pending', showModal: true });
 
       await getImages(query, page)
         .then(({ data }) => {
           if (data.hits.length === 0) {
-            showNotification('There is no images for this search query');
-            this.setState({ status: 'idle', images: [] });
-            toggleModal();
+            showNotification('No images found! Try some other search keyword');
+            this.setState({ status: 'idle', images: [], showModal: false });
             return;
           }
 
@@ -41,35 +39,33 @@ class App extends Component {
             images: data.hits,
             totalImages: data.totalHits,
             status: 'resolved',
+            showModal: false,
           });
-          toggleModal();
         })
         .catch(error => {
           console.log(error.message);
           this.setState({ status: 'rejected' });
         });
     } else if (prevStates.page !== page) {
-      this.setState({ status: 'pending' });
-      toggleModal();
+      this.setState({ status: 'pending', showModal: true });
 
       await getImages(query, page)
         .then(({ data }) => {
-          toggleModal();
-          this.setState(prevState => ({
-            images: [...prevState.images, ...data.hits],
+          this.setState(({ images }) => ({
+            images: [...images, ...data.hits],
             status: 'resolved',
+            showModal: false,
           }));
         })
         .catch(error => {
           console.log(error.message);
-          this.setState({ status: 'rejected' });
-          toggleModal();
+          this.setState({ status: 'rejected', showModal: true });
         });
     }
   }
 
   handleLoadMoreBtn = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+    this.setState(({ page }) => ({ page: page + 1 }));
   };
 
   handleFormSubmit = query => {
@@ -99,10 +95,18 @@ class App extends Component {
     const { images, totalImages, status, page, showModal, activeImage } =
       this.state;
 
+    const toastOptions = {
+      style: {
+        padding: '18px',
+        color: '#D8000C',
+        background: '#FFBABA',
+      },
+    };
+
     if (status === 'idle') {
       return (
         <Container>
-          <Toaster />
+          <Toaster toastOptions={toastOptions} />
           <Searchbar onSubmit={handleFormSubmit} />
         </Container>
       );
@@ -112,7 +116,7 @@ class App extends Component {
       if (page > 1) {
         return (
           <Container>
-            <Toaster />
+            <Toaster toastOptions={toastOptions} />
             <Searchbar onSubmit={handleFormSubmit} />
             <ImageGallery images={images} />
 
@@ -126,7 +130,7 @@ class App extends Component {
       } else {
         return (
           <Container>
-            <Toaster />
+            <Toaster toastOptions={toastOptions} />
             <Searchbar onSubmit={handleFormSubmit} />
 
             {showModal && (
@@ -142,7 +146,6 @@ class App extends Component {
     if (status === 'rejected') {
       return (
         <Container>
-          <Toaster />
           <Searchbar onSubmit={handleFormSubmit} />
           <ErrorText>Something went wrong... Try again later!</ErrorText>
         </Container>
@@ -152,12 +155,14 @@ class App extends Component {
     if (status === 'resolved') {
       return (
         <Container>
-          <Toaster />
+          <Toaster toastOptions={toastOptions} />
           <Searchbar onSubmit={handleFormSubmit} />
           <ImageGallery images={images} onClick={handleImageClick} />
-          {totalImages !== images.length ? (
+
+          {totalImages !== images.length && (
             <Button onClick={handleLoadMoreBtn} />
-          ) : null}
+          )}
+
           {showModal && (
             <Modal onClose={toggleModal}>
               <img src={images[activeImage].largeImageURL} alt="hello" />

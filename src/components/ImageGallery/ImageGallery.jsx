@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { GalleryBox } from './ImageGallery.styled';
 import ImageGalleryItem from '../ImageGalleryItem';
 
 class ImageGallery extends Component {
+  static propTypes = {
+    images: PropTypes.arrayOf(PropTypes.object).isRequired,
+    onClick: PropTypes.func,
+  };
+
   state = { activeImage: 0 };
 
   setActiveImage = index => {
@@ -10,7 +16,8 @@ class ImageGallery extends Component {
   };
 
   render() {
-    const { images } = this.props;
+    const { images, onClick } = this.props;
+    const { setActiveImage } = this;
     return (
       <GalleryBox>
         {images.map(({ webformatURL, tags }, index) => (
@@ -19,8 +26,8 @@ class ImageGallery extends Component {
             imageUrl={webformatURL}
             imageTags={tags}
             onClick={() => {
-              this.setActiveImage(index);
-              this.props.onClick(index);
+              setActiveImage(index);
+              onClick(index);
             }}
           />
         ))}
