@@ -22,55 +22,48 @@ class App extends Component {
 
   async componentDidUpdate(_, prevStates) {
     const { page, query } = this.state;
-    const { showNotification, filterApiResponse, handleError } = this;
-    let filteredImages = [];
+    const { showNotification, handleApiResponse, handleError } = this;
 
     if (prevStates.query !== query) {
-      this.setState({ status: 'pending', showModal: true });
-
+      this.setState({ status: 'pending', showModal: true, images: [] });
       await getImages(query, page)
-        .then(({ data: { hits, totalHits } }) => {
-          if (hits.length === 0) {
+        .then(({ data }) => {
+          if (data.hits.length === 0) {
             showNotification('No images found! Try some other search keyword');
-            this.setState({ status: 'idle', images: [], showModal: false });
+            this.setState({ status: 'idle', showModal: false });
             return;
           }
 
-          filterApiResponse(hits, filteredImages);
-
-          this.setState({
-            images: filteredImages,
-            totalImages: totalHits,
-            status: 'resolved',
-            showModal: false,
-          });
+          handleApiResponse(data);
         })
         .catch(error => handleError(error));
     } else if (prevStates.page !== page) {
-      this.setState({ status: 'pending', showModal: true });
-
       await getImages(query, page)
-        .then(({ data: { hits } }) => {
-          filterApiResponse(hits, filteredImages);
-
-          this.setState(({ images }) => ({
-            images: [...images, ...filteredImages],
-            status: 'resolved',
-            showModal: false,
-          }));
+        .then(({ data }) => {
+          handleApiResponse(data);
         })
         .catch(error => handleError(error));
     }
   }
 
-  filterApiResponse = (response, arr) => {
-    response.forEach(({ tags, webformatURL, largeImageURL }) => {
+  handleApiResponse = response => {
+    const filteredImages = [];
+    const { hits, totalHits } = response;
+
+    hits.forEach(({ tags, webformatURL, largeImageURL }) => {
       let imageData = {
         tags,
         webformatURL,
         largeImageURL,
       };
-      return arr.push(imageData);
+      filteredImages.push(imageData);
+    });
+
+    this.setState({
+      images: [...this.state.images, ...filteredImages],
+      totalImages: totalHits,
+      status: 'resolved',
+      showModal: false,
     });
   };
 
@@ -100,15 +93,43 @@ class App extends Component {
     this.toggleModal();
   };
 
+  renderPending = page => {
+    const { images, showModal } = this.state;
+
+    return (
+      <>
+        {page > 1 && <ImageGallery images={images} />}
+        {showModal && (
+          <Modal>
+            <Loader />
+          </Modal>
+        )}
+      </>
+    );
+  };
+
+  renderResolved = () => {
+    const { images, showModal, totalImages, activeImage } = this.state;
+    const { handleImageClick, handleLoadMoreBtn, toggleModal } = this;
+
+    return (
+      <>
+        <ImageGallery images={images} onClick={handleImageClick} />;
+        {totalImages !== images.length && (
+          <Button onClick={handleLoadMoreBtn} />
+        )}
+        {showModal && (
+          <Modal onClose={toggleModal}>
+            <img src={images[activeImage].largeImageURL} alt="hello" />
+          </Modal>
+        )}
+      </>
+    );
+  };
+
   render() {
-    const {
-      handleFormSubmit,
-      handleLoadMoreBtn,
-      toggleModal,
-      handleImageClick,
-    } = this;
-    const { images, totalImages, status, page, showModal, activeImage } =
-      this.state;
+    const { handleFormSubmit, renderPending, renderResolved } = this;
+    const { status, page } = this.state;
 
     const toastOptions = {
       style: {
@@ -118,74 +139,20 @@ class App extends Component {
       },
     };
 
-    if (status === 'idle') {
-      return (
-        <Container>
-          <Toaster toastOptions={toastOptions} />
-          <Searchbar onSubmit={handleFormSubmit} />
-        </Container>
-      );
-    }
+    return (
+      <Container>
+        <Toaster toastOptions={toastOptions} />
+        <Searchbar onSubmit={handleFormSubmit} />
 
-    if (status === 'pending') {
-      if (page > 1) {
-        return (
-          <Container>
-            <Toaster toastOptions={toastOptions} />
-            <Searchbar onSubmit={handleFormSubmit} />
-            <ImageGallery images={images} />
+        {status === 'pending' && renderPending(page)}
 
-            {showModal && (
-              <Modal>
-                <Loader />
-              </Modal>
-            )}
-          </Container>
-        );
-      } else {
-        return (
-          <Container>
-            <Toaster toastOptions={toastOptions} />
-            <Searchbar onSubmit={handleFormSubmit} />
-
-            {showModal && (
-              <Modal>
-                <Loader />
-              </Modal>
-            )}
-          </Container>
-        );
-      }
-    }
-
-    if (status === 'rejected') {
-      return (
-        <Container>
-          <Searchbar onSubmit={handleFormSubmit} />
+        {status === 'rejected' && (
           <ErrorText>Something went wrong... Try again later!</ErrorText>
-        </Container>
-      );
-    }
+        )}
 
-    if (status === 'resolved') {
-      return (
-        <Container>
-          <Toaster toastOptions={toastOptions} />
-          <Searchbar onSubmit={handleFormSubmit} />
-          <ImageGallery images={images} onClick={handleImageClick} />
-
-          {totalImages !== images.length && (
-            <Button onClick={handleLoadMoreBtn} />
-          )}
-
-          {showModal && (
-            <Modal onClose={toggleModal}>
-              <img src={images[activeImage].largeImageURL} alt="hello" />
-            </Modal>
-          )}
-        </Container>
-      );
-    }
+        {status === 'resolved' && renderResolved()}
+      </Container>
+    );
   }
 }
 
