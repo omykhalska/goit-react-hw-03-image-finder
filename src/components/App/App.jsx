@@ -22,47 +22,62 @@ class App extends Component {
 
   async componentDidUpdate(_, prevStates) {
     const { page, query } = this.state;
-    const { showNotification, toggleModal } = this;
+    const { showNotification, filterApiResponse, handleError } = this;
+    let filteredImages = [];
 
     if (prevStates.query !== query) {
       this.setState({ status: 'pending', showModal: true });
 
       await getImages(query, page)
-        .then(({ data }) => {
-          if (data.hits.length === 0) {
+        .then(({ data: { hits, totalHits } }) => {
+          if (hits.length === 0) {
             showNotification('No images found! Try some other search keyword');
             this.setState({ status: 'idle', images: [], showModal: false });
             return;
           }
 
+          filterApiResponse(hits, filteredImages);
+
           this.setState({
-            images: data.hits,
-            totalImages: data.totalHits,
+            images: filteredImages,
+            totalImages: totalHits,
             status: 'resolved',
             showModal: false,
           });
         })
-        .catch(error => {
-          console.log(error.message);
-          this.setState({ status: 'rejected' });
-        });
+        .catch(error => handleError(error));
     } else if (prevStates.page !== page) {
       this.setState({ status: 'pending', showModal: true });
 
       await getImages(query, page)
-        .then(({ data }) => {
+        .then(({ data: { hits } }) => {
+          filterApiResponse(hits, filteredImages);
+
           this.setState(({ images }) => ({
-            images: [...images, ...data.hits],
+            images: [...images, ...filteredImages],
             status: 'resolved',
             showModal: false,
           }));
         })
-        .catch(error => {
-          console.log(error.message);
-          this.setState({ status: 'rejected', showModal: true });
-        });
+        .catch(error => handleError(error));
     }
   }
+
+  filterApiResponse = (response, arr) => {
+    response.forEach(({ tags, webformatURL, largeImageURL }) => {
+      let imageData = {
+        tags,
+        webformatURL,
+        largeImageURL,
+      };
+      return arr.push(imageData);
+    });
+  };
+
+  handleError = ({ message }) => {
+    console.log(message);
+    this.setState({ status: 'rejected' });
+  };
 
   handleLoadMoreBtn = () => {
     this.setState(({ page }) => ({ page: page + 1 }));
