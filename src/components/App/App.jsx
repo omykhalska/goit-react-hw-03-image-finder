@@ -38,6 +38,7 @@ class App extends Component {
         })
         .catch(error => handleError(error));
     } else if (prevStates.page !== page) {
+      this.setState({ status: 'pending', showModal: true });
       await getImages(query, page)
         .then(({ data }) => {
           handleApiResponse(data);
@@ -120,7 +121,10 @@ class App extends Component {
         )}
         {showModal && (
           <Modal onClose={toggleModal}>
-            <img src={images[activeImage].largeImageURL} alt="hello" />
+            <img
+              src={images[activeImage].largeImageURL}
+              alt={images[activeImage].tags}
+            />
           </Modal>
         )}
       </>
